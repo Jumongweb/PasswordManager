@@ -46,6 +46,12 @@ public class UserPasswordService implements UserService{
         return users.findAll();
     }
 
+    @Override
+    public void deleteUserBy(String username) {
+        var user = findUserBy(username);
+        users.delete(user);
+    }
+
     public void validate(String username){
         for (User user : users.findAll()){
             if (user.getUsername().equals(username)) throw new UsernameAlreadyExistException(String.format("%s already exist", username));

@@ -2,6 +2,7 @@ package com.africa.semicolon.services;
 
 import com.africa.semicolon.data.models.User;
 import com.africa.semicolon.data.repositories.Users;
+import com.africa.semicolon.dtos.request.LoginRequest;
 import com.africa.semicolon.dtos.request.UserRegisterRequest;
 import com.africa.semicolon.dtos.response.RegisterUserResponse;
 import com.africa.semicolon.exceptions.UserNotFoundException;
@@ -129,6 +130,55 @@ public class UserPasswordServiceTest {
         sample.add(userService.findUserBy("username2"));
         sample.add(userService.findUserBy("username3"));
         assertEquals(userService.findAllUsers(), sample);
+    }
+
+    @Test
+    public void testThatUserServiceCanDeleteUser(){
+        UserRegisterRequest userRegisterRequest1 = new UserRegisterRequest();
+        userRegisterRequest1.setFirstname("firstname1");
+        userRegisterRequest1.setLastname("lastname1");
+        userRegisterRequest1.setUsername("username1");
+        userRegisterRequest1.setPassword("password1");
+        userService.register(userRegisterRequest1);
+        UserRegisterRequest userRegisterRequest2= new UserRegisterRequest();
+        userRegisterRequest2.setFirstname("firstname2");
+        userRegisterRequest2.setLastname("lastname2");
+        userRegisterRequest2.setUsername("username2");
+        userRegisterRequest2.setPassword("password2");
+        userService.register(userRegisterRequest2);
+        assertEquals(2, userService.count());
+        userService.deleteUserBy("username1");
+        assertEquals(1, userService.count());
+    }
+
+    @Test
+    public void testDeleteUserThatDoesNotExistUserServiceThrowsException(){
+        UserRegisterRequest userRegisterRequest1 = new UserRegisterRequest();
+        userRegisterRequest1.setFirstname("firstname1");
+        userRegisterRequest1.setLastname("lastname1");
+        userRegisterRequest1.setUsername("username1");
+        userRegisterRequest1.setPassword("password1");
+        userService.register(userRegisterRequest1);
+        assertEquals(1, userService.count());
+        assertThrows(UserNotFoundException.class, ()->userService.deleteUserBy("wrongUsername"));
+        assertEquals(1, userService.count());
+    }
+
+    @Test
+    public void testThatUserCanLogin(){
+        UserRegisterRequest userRegisterRequest1 = new UserRegisterRequest();
+        userRegisterRequest1.setFirstname("firstname1");
+        userRegisterRequest1.setLastname("lastname1");
+        userRegisterRequest1.setUsername("username1");
+        userRegisterRequest1.setPassword("password1");
+        userService.register(userRegisterRequest1);
+        assertEquals(1, userService.count());
+        User user = users.findUserBy("username1");
+        assertFalse(user.isLoggedIn());
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setUsername("username1");
+        loginRequest.setPassword("password1");
+        userService.login(loginRequest);
     }
 
 }

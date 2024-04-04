@@ -1,6 +1,7 @@
 package com.africa.semicolon.services;
 
 import com.africa.semicolon.data.models.User;
+import com.africa.semicolon.dtos.request.LoginRequest;
 import com.africa.semicolon.dtos.request.UserRegisterRequest;
 import com.africa.semicolon.dtos.response.RegisterUserResponse;
 
@@ -14,4 +15,8 @@ public interface UserService {
     User findUserBy(String username);
 
     List<User> findAllUsers();
+
+    void deleteUserBy(String username);
+
+    void login(LoginRequest loginRequest);
 }
