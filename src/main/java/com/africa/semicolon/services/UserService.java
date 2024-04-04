@@ -1,2 +1,4 @@
-package com.africa.semicolon.services;public interface UserService {
+package com.africa.semicolon.services;
+
+public interface UserService {
 }
