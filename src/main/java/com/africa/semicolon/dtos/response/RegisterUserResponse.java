@@ -6,5 +6,6 @@ import lombok.Data;
 public class RegisterUserResponse {
     private String id;
     private String username;
-    private String dateRegistered;
+    private String firstname;
+    private String lastname;
 }
