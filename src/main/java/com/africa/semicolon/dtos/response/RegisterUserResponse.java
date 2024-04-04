@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class RegisterUserResponse {
-    private String firstname;
-    private String lastname;
-
+    private String id;
+    private String username;
+    private String dateRegistered;
 }
