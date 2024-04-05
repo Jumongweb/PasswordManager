@@ -7,6 +7,8 @@ import com.africa.semicolon.dtos.request.UserRegisterRequest;
 import com.africa.semicolon.dtos.response.CreatePasswordResponse;
 import com.africa.semicolon.dtos.response.RegisterUserResponse;
 
+import java.time.format.DateTimeFormatter;
+
 public class Mapper {
     public static User map(UserRegisterRequest userRegisterRequest){
         User user = new User();
@@ -26,20 +28,27 @@ public class Mapper {
         return response;
     }
 
-    public static CreatePasswordResponse map(PasswordEntry passwordEntry){
-        CreatePasswordResponse response = new CreatePasswordResponse();
-        response.setWebsiteName(passwordEntry.getWebsiteName());
-        response.setUsername(passwordEntry.getUsername());
-        return response;
-    }
+//    public static CreatePasswordResponse map(PasswordEntry passwordEntry){
+//        CreatePasswordResponse response = new CreatePasswordResponse();
+//        response.setWebsiteName(passwordEntry.getWebsiteName());
+//        response.setUsername(passwordEntry.getUsername());
+//        return response;
+//    }
 
     public static PasswordEntry map(CreatePasswordRequest createPasswordRequest){
         PasswordEntry passwordEntry = new PasswordEntry();
         passwordEntry.setUsername(createPasswordRequest.getUsername());
         passwordEntry.setWebsiteUsername(createPasswordRequest.getWebsiteUsername());
-        passwordEntry.setWebsiteName(passwordEntry.getWebsiteName());
+        passwordEntry.setName(passwordEntry.getName());
         passwordEntry.setPassword(createPasswordRequest.getPassword());
         return passwordEntry;
+    }
+
+    public static CreatePasswordResponse map(PasswordEntry passwordEntry){
+        CreatePasswordResponse createPasswordResponse = new CreatePasswordResponse();
+        createPasswordResponse.setUsername(passwordEntry.getUsername());
+        createPasswordResponse.setDateCreated(DateTimeFormatter.ofPattern("dd-:MM-yyyy hh:mm:ss").format(passwordEntry.getDateCreated()));
+        return createPasswordResponse;
     }
 
 //    public static User map(LoginRequest loginRequest){

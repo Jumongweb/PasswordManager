@@ -1,11 +1,15 @@
 package com.africa.semicolon.services;
 
+import com.africa.semicolon.data.models.PasswordEntry;
 import com.africa.semicolon.data.models.User;
+import com.africa.semicolon.data.repositories.PasswordRepository;
 import com.africa.semicolon.data.repositories.Users;
 import com.africa.semicolon.dtos.request.LoginRequest;
 import com.africa.semicolon.dtos.request.CreatePasswordRequest;
+import com.africa.semicolon.dtos.request.LogoutRequest;
 import com.africa.semicolon.dtos.request.UserRegisterRequest;
 import com.africa.semicolon.exceptions.UserNotFoundException;
+import com.africa.semicolon.exceptions.UserNotLoggedInException;
 import com.africa.semicolon.exceptions.UsernameAlreadyExistException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,9 +29,16 @@ public class UserPasswordServiceTest {
     @Autowired
     private Users users;
 
+    @Autowired
+    private PasswordEntryService passwordEntryService;
+
+    @Autowired
+    private PasswordRepository passwordEntries;
+
     @BeforeEach
     public void setUp(){
         users.deleteAll();
+        passwordEntries.deleteAll();
     }
     @Test
     public void testThatUserServiceCanCreateUser(){
@@ -222,12 +233,81 @@ public class UserPasswordServiceTest {
     }
 
     @Test
-    public void testThatUserCanCreatePassword(){
-        CreatePasswordRequest createPasswordRequest = new CreatePasswordRequest();
-
+    public void testThatUserCanLoginThenLogout(){
+        UserRegisterRequest userRegisterRequest1 = new UserRegisterRequest();
+        userRegisterRequest1.setFirstname("firstname1");
+        userRegisterRequest1.setLastname("lastname1");
+        userRegisterRequest1.setUsername("user1");
+        userRegisterRequest1.setPassword("password1");
+        userService.register(userRegisterRequest1);
+        assertEquals(1, userService.count());
+        LoginRequest loginRequest = new LoginRequest();
+        User user = users.findUserBy("user1");
+        assertFalse(user.isLoggedIn());
+        loginRequest.setUsername("user1");
+        loginRequest.setPassword("password1");
+        userService.login(loginRequest);
+        user = users.findUserBy("user1");
+        assertTrue(user.isLoggedIn());
+        LogoutRequest logoutRequest = new LogoutRequest();
+        logoutRequest.setUsername("user1");
+        userService.logout(logoutRequest);
+        user = users.findUserBy("user1");
+        assertFalse(user.isLoggedIn());
     }
 
     @Test
+    public void testThatUserCanLoginButCannotLogoutWithWrongUsername(){
+        UserRegisterRequest userRegisterRequest1 = new UserRegisterRequest();
+        userRegisterRequest1.setFirstname("firstname1");
+        userRegisterRequest1.setLastname("lastname1");
+        userRegisterRequest1.setUsername("user1");
+        userRegisterRequest1.setPassword("password1");
+        userService.register(userRegisterRequest1);
+        assertEquals(1, userService.count());
+        LoginRequest loginRequest = new LoginRequest();
+        User user = users.findUserBy("user1");
+        assertFalse(user.isLoggedIn());
+        loginRequest.setUsername("user1");
+        loginRequest.setPassword("password1");
+        userService.login(loginRequest);
+        user = users.findUserBy("user1");
+        assertTrue(user.isLoggedIn());
+        LogoutRequest logoutRequest = new LogoutRequest();
+        logoutRequest.setUsername("wrongUser");
+        assertThrows(UserNotFoundException.class, ()->userService.logout(logoutRequest));
+        user = users.findUserBy("user1");
+        assertTrue(user.isLoggedIn());
+    }
+
+    @Test
+    public void testThatUserCanLogin_Logout_ThenLoginAgain(){
+        UserRegisterRequest userRegisterRequest1 = new UserRegisterRequest();
+        userRegisterRequest1.setFirstname("firstname1");
+        userRegisterRequest1.setLastname("lastname1");
+        userRegisterRequest1.setUsername("user1");
+        userRegisterRequest1.setPassword("password1");
+        userService.register(userRegisterRequest1);
+        assertEquals(1, userService.count());
+        LoginRequest loginRequest = new LoginRequest();
+        User user = users.findUserBy("user1");
+        assertFalse(user.isLoggedIn());
+        loginRequest.setUsername("user1");
+        loginRequest.setPassword("password1");
+        userService.login(loginRequest);
+        user = users.findUserBy("user1");
+        assertTrue(user.isLoggedIn());
+        LogoutRequest logoutRequest = new LogoutRequest();
+        logoutRequest.setUsername("user1");
+        userService.logout(logoutRequest);
+        user = users.findUserBy("user1");
+        assertFalse(user.isLoggedIn());
+        userService.login(loginRequest);
+        user = users.findUserBy("user1");
+        assertTrue(user.isLoggedIn());
+    }
+
+    /*@Test
     public void testThatUserCanSavePassword(){
         UserRegisterRequest userRegisterRequest1 = new UserRegisterRequest();
         userRegisterRequest1.setFirstname("firstname1");
@@ -286,5 +366,127 @@ public class UserPasswordServiceTest {
         createPasswordRequest.setPassword("passkey");
         userService.createPasswordEntry("username1", createPasswordRequest);
         assertEquals(1, userService.userNumberOfPassword("username1"));
+    } */
+
+    @Test
+    public void testThatUserCanCreatePassword(){
+        UserRegisterRequest userRegisterRequest1 = new UserRegisterRequest();
+        userRegisterRequest1.setFirstname("firstname1");
+        userRegisterRequest1.setLastname("lastname1");
+        userRegisterRequest1.setUsername("user1");
+        userRegisterRequest1.setPassword("password1");
+        userService.register(userRegisterRequest1);
+        assertEquals(1, userService.count());
+        LoginRequest loginRequest = new LoginRequest();
+        User user = users.findUserBy("user1");
+        assertFalse(user.isLoggedIn());
+        loginRequest.setUsername("user1");
+        loginRequest.setPassword("password1");
+        userService.login(loginRequest);
+        user = users.findUserBy("user1");
+        assertTrue(user.isLoggedIn());
+        CreatePasswordRequest createPasswordRequest = new CreatePasswordRequest();
+        createPasswordRequest.setWebsiteName("facebook");
+        createPasswordRequest.setWebsiteUsername("Jumong1234");
+        createPasswordRequest.setPassword("passkey");
+        createPasswordRequest.setUsername("user1");
+        userService.createPasswordEntry(createPasswordRequest);
+        assertEquals(1, passwordEntryService.getPasswordFor("user1").size());
     }
+
+    @Test
+    public void testThatUserCannotCreatePasswordIfUserIsNotLoggedIn(){
+        UserRegisterRequest userRegisterRequest1 = new UserRegisterRequest();
+        userRegisterRequest1.setFirstname("firstname1");
+        userRegisterRequest1.setLastname("lastname1");
+        userRegisterRequest1.setUsername("user1");
+        userRegisterRequest1.setPassword("password1");
+        userService.register(userRegisterRequest1);
+        assertEquals(1, userService.count());
+        LoginRequest loginRequest = new LoginRequest();
+        User user = users.findUserBy("user1");
+        assertFalse(user.isLoggedIn());
+        CreatePasswordRequest createPasswordRequest = new CreatePasswordRequest();
+        createPasswordRequest.setWebsiteName("facebook");
+        createPasswordRequest.setWebsiteUsername("Jumong1234");
+        createPasswordRequest.setPassword("passkey");
+        createPasswordRequest.setUsername("user1");
+        assertThrows(UserNotLoggedInException.class, ()->userService.createPasswordEntry(createPasswordRequest));
+    }
+
+    @Test
+    public void testThatPasswordServiceCanFindPassword(){
+        UserRegisterRequest userRegisterRequest1 = new UserRegisterRequest();
+        userRegisterRequest1.setFirstname("firstname1");
+        userRegisterRequest1.setLastname("lastname1");
+        userRegisterRequest1.setUsername("user1");
+        userRegisterRequest1.setPassword("password1");
+        userService.register(userRegisterRequest1);
+        assertEquals(1, userService.count());
+
+        LoginRequest loginRequest = new LoginRequest();
+        User user = users.findUserBy("user1");
+        assertFalse(user.isLoggedIn());
+        loginRequest.setUsername("user1");
+        loginRequest.setPassword("password1");
+        userService.login(loginRequest);
+        user = users.findUserBy("user1");
+        assertTrue(user.isLoggedIn());
+
+        CreatePasswordRequest createPasswordRequest = new CreatePasswordRequest();
+        createPasswordRequest.setWebsiteName("facebook");
+        createPasswordRequest.setWebsiteUsername("Jumong1234");
+        createPasswordRequest.setPassword("passkey");
+        createPasswordRequest.setUsername("user1");
+        userService.createPasswordEntry(createPasswordRequest);
+        assertEquals(1, passwordEntryService.getPasswordFor("user1").size());
+        PasswordEntry passwordEntry = passwordEntryService.findPasswordBy("facebook");
+        assertEquals("passkey", passwordEntry.getPassword());
+    }
+
+
+
+    @Test
+    public void testUserCreate3PasswordPasswordEntriesIs3(){
+        UserRegisterRequest userRegisterRequest1 = new UserRegisterRequest();
+        userRegisterRequest1.setFirstname("firstname1");
+        userRegisterRequest1.setLastname("lastname1");
+        userRegisterRequest1.setUsername("user1");
+        userRegisterRequest1.setPassword("password1");
+        userService.register(userRegisterRequest1);
+        assertEquals(1, userService.count());
+
+        LoginRequest loginRequest = new LoginRequest();
+        User user = users.findUserBy("user1");
+        assertFalse(user.isLoggedIn());
+        loginRequest.setUsername("user1");
+        loginRequest.setPassword("password1");
+        userService.login(loginRequest);
+        user = users.findUserBy("user1");
+        assertTrue(user.isLoggedIn());
+
+        CreatePasswordRequest createPasswordRequest1 = new CreatePasswordRequest();
+        createPasswordRequest1.setWebsiteName("facebook");
+        createPasswordRequest1.setWebsiteUsername("Jumong1234");
+        createPasswordRequest1.setPassword("passkey");
+        createPasswordRequest1.setUsername("user1");
+        userService.createPasswordEntry(createPasswordRequest1);
+
+        CreatePasswordRequest createPasswordRequest2 = new CreatePasswordRequest();
+        createPasswordRequest2.setWebsiteName("twitter");
+        createPasswordRequest2.setWebsiteUsername("Toheeb1234");
+        createPasswordRequest2.setPassword("passkey2");
+        createPasswordRequest2.setUsername("user1");
+        userService.createPasswordEntry(createPasswordRequest2);
+
+        CreatePasswordRequest createPasswordRequest3  = new CreatePasswordRequest();
+        createPasswordRequest3.setWebsiteName("facebook");
+        createPasswordRequest3.setWebsiteUsername("Lawal1234");
+        createPasswordRequest3.setPassword("passkey3");
+        createPasswordRequest3.setUsername("user1");
+        userService.createPasswordEntry(createPasswordRequest3);
+        assertEquals(3, passwordEntryService.getPasswordFor("user1").size());
+    }
+
+
 }

@@ -4,6 +4,8 @@ import lombok.Data;
 
 @Data
 public class CreatePasswordResponse {
-    private String websiteName;
+    private String name;
+    private String websiteUsername;
     private String username;
+    private String dateCreated;
 }
