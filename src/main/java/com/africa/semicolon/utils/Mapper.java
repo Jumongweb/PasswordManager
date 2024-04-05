@@ -1,10 +1,11 @@
 package com.africa.semicolon.utils;
 
+import com.africa.semicolon.data.models.PasswordEntry;
 import com.africa.semicolon.data.models.User;
+import com.africa.semicolon.dtos.request.CreatePasswordRequest;
 import com.africa.semicolon.dtos.request.UserRegisterRequest;
+import com.africa.semicolon.dtos.response.CreatePasswordResponse;
 import com.africa.semicolon.dtos.response.RegisterUserResponse;
-
-import java.time.format.DateTimeFormatter;
 
 public class Mapper {
     public static User map(UserRegisterRequest userRegisterRequest){
@@ -23,6 +24,22 @@ public class Mapper {
         response.setFirstname(user.getFirstname());
         response.setLastname(user.getLastname());
         return response;
+    }
+
+    public static CreatePasswordResponse map(PasswordEntry passwordEntry){
+        CreatePasswordResponse response = new CreatePasswordResponse();
+        response.setWebsiteName(passwordEntry.getWebsiteName());
+        response.setUsername(passwordEntry.getUsername());
+        return response;
+    }
+
+    public static PasswordEntry map(CreatePasswordRequest createPasswordRequest){
+        PasswordEntry passwordEntry = new PasswordEntry();
+        passwordEntry.setUsername(createPasswordRequest.getUsername());
+        passwordEntry.setWebsiteUsername(createPasswordRequest.getWebsiteUsername());
+        passwordEntry.setWebsiteName(passwordEntry.getWebsiteName());
+        passwordEntry.setPassword(createPasswordRequest.getPassword());
+        return passwordEntry;
     }
 
 //    public static User map(LoginRequest loginRequest){

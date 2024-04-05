@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class PasswordEntry {
     @Id
     private String websiteName;
-    private String username;
+    private String websiteUsername;
     private String password;
+    private String username;
 }

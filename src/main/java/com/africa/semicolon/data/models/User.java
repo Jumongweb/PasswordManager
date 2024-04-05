@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -18,5 +19,5 @@ public class User {
     private String password;
     private boolean isLoggedIn;
     @DBRef
-    private List<PasswordEntry> passwordEntries;
+    private List<PasswordEntry> passwordEntries = new ArrayList<>();
 }

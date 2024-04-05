@@ -2,7 +2,9 @@ package com.africa.semicolon.services;
 
 import com.africa.semicolon.data.models.User;
 import com.africa.semicolon.dtos.request.LoginRequest;
+import com.africa.semicolon.dtos.request.CreatePasswordRequest;
 import com.africa.semicolon.dtos.request.UserRegisterRequest;
+import com.africa.semicolon.dtos.response.CreatePasswordResponse;
 import com.africa.semicolon.dtos.response.RegisterUserResponse;
 
 import java.util.List;
@@ -18,5 +20,10 @@ public interface UserService {
 
     void deleteUserBy(String username);
 
-    void login(LoginRequest loginRequest);
+    User login(LoginRequest loginRequest);
+
+    CreatePasswordResponse createPasswordEntry(CreatePasswordRequest createPasswordRequest);
+    CreatePasswordResponse createPasswordEntry(String username, CreatePasswordRequest createPasswordRequest);
+
+    int userNumberOfPassword(String username);
 }
